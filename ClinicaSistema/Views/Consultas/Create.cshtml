@@ -1,0 +1,92 @@
+﻿@model ClinicaSistema.Models.Consulta
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>Consulta</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- Campo de Especialidade -->
+            <div class="form-group">
+                <label class="control-label">Especialidades</label>
+                <select id="EspecialidadeId" asp-for="EspecialidadeId" class="form-control" asp-items="ViewBag.EspecialidadeId">
+                    <option value="">Selecione uma especialidade</option>
+                </select>
+            </div>
+
+            <!-- Campo de Médico (será atualizado via AJAX) -->
+            <div class="form-group">
+                <label class="control-label">Médico</label>
+                <select id="MedicoId" asp-for="MedicoId" class="form-control">
+                    <option value="">Selecione um médico</option>
+                </select>
+            </div>
+
+            <!-- Campo de Paciente -->
+            <div class="form-group">
+                <label class="control-label">Paciente</label>
+                <select asp-for="PacienteId" class="form-control" asp-items="ViewBag.PacienteId"></select>
+            </div>
+
+            <!-- Campo de Procedimento -->
+            <div class="form-group">
+                <label asp-for="Procedimento" class="control-label"></label>
+                <input asp-for="Procedimento" class="form-control" />
+                <span asp-validation-for="Procedimento" class="text-danger"></span>
+            </div>
+
+            <!-- Campo de Data de Consulta -->
+            <div class="form-group">
+                <label asp-for="DataConsulta" class="control-label"></label>
+                <input asp-for="DataConsulta" class="form-control" />
+                <span asp-validation-for="DataConsulta" class="text-danger"></span>
+            </div>
+
+            <!-- Botão de submissão -->
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <!-- Script para atualizar médicos dinamicamente ao selecionar especialidade -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#EspecialidadeId').change(function () {
+                var especialidadeId = $(this).val();
+                if (especialidadeId) {
+                    $.ajax({
+                        url: '@Url.Action("GetMedicosByEspecialidade", "Consultas")', // Chama o método no controller
+                        data: { especialidadeId: especialidadeId },
+                        success: function (data) {
+                            $('#MedicoId').empty(); // Limpa o campo de médicos
+                            $('#MedicoId').append('<option value="">Selecione um médico</option>'); // Adiciona a opção padrão
+                            $.each(data, function (i, medico) {
+                                $('#MedicoId').append('<option value="' + medico.medicosId + '">' + medico.nome + '</option>'); // Preenche o select com os médicos filtrados
+                            });
+                        }
+                    });
+                } else {
+                    $('#MedicoId').empty();
+                    $('#MedicoId').append('<option value="">Selecione um médico</option>'); // Se nenhuma especialidade estiver selecionada, mantém o select vazio
+                }
+            });
+        });
+    </script>
+}
